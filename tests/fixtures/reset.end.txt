@@ -1,0 +1,4 @@
+llamacpp:prompt_tokens_total 100
+llamacpp:prompt_tokens_cached_total 20
+llamacpp:tokens_predicted_total 10
+strata:gpu_power_watts{gpu="0"} 205.0

@@ -1,0 +1,33 @@
+# HELP llamacpp:prompt_tokens_total Prompt tokens read
+# TYPE llamacpp:prompt_tokens_total counter
+llamacpp:prompt_tokens_total 5000
+# HELP llamacpp:prompt_tokens_cached_total Prompt tokens the conversation cache already held
+# TYPE llamacpp:prompt_tokens_cached_total counter
+llamacpp:prompt_tokens_cached_total 1000
+# HELP llamacpp:prompt_seconds_total Prompt read time
+# TYPE llamacpp:prompt_seconds_total counter
+llamacpp:prompt_seconds_total 12.5
+# HELP llamacpp:tokens_predicted_total Tokens generated
+# TYPE llamacpp:tokens_predicted_total counter
+llamacpp:tokens_predicted_total 1000
+# HELP llamacpp:tokens_predicted_seconds_total Generation time
+# TYPE llamacpp:tokens_predicted_seconds_total counter
+llamacpp:tokens_predicted_seconds_total 40
+# HELP llamacpp:prompt_tokens_seconds Average prompt read throughput in tokens/s, since the last scrape
+# TYPE llamacpp:prompt_tokens_seconds gauge
+llamacpp:prompt_tokens_seconds 400
+# HELP llamacpp:predicted_tokens_seconds Average generation throughput in tokens/s, since the last scrape
+# TYPE llamacpp:predicted_tokens_seconds gauge
+llamacpp:predicted_tokens_seconds 25
+# HELP llamacpp:requests_processing Requests running
+# TYPE llamacpp:requests_processing gauge
+llamacpp:requests_processing 0
+# HELP strata:requests_total Requests finished
+# TYPE strata:requests_total counter
+strata:requests_total 25
+# HELP strata:gpu_power_watts GPU power draw
+# TYPE strata:gpu_power_watts gauge
+strata:gpu_power_watts{gpu="0"} 210.0
+# HELP vllm:prompt_tokens_total Prompt tokens of the finished requests.
+# TYPE vllm:prompt_tokens_total counter
+vllm:prompt_tokens_total{model="qwen3.8-flash-next-iq3_s"} 6000

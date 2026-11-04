@@ -38,19 +38,28 @@ The sample is only as good as the load you put through it.
 
 ```
 llm-cost: rate=0.12215 $/kWh  baseline=50W  window=120s  idle-threshold=30W
-llm-cost: amd cards: 1  nvidia-smi: 1
-llm-cost: :8080 engine=strata  :9931 unreachable, skipping
+llm-cost: amd cards: 1  nvidia-smi: 1  power: sensors
+llm-cost: :8080 engine=strata model=qwen3.8-flash-next-iq3_s
+llm-cost: :9931 has no llama.cpp-compatible /metrics, skipping
 llm-cost: sampling for 120s (generate some tokens for a good sample)...
 
 === strata server :8080 (qwen3.8-flash-next-iq3_s) ===
   gpu power: active avg 218.4 W (87 active samples, range 24-241 W)
-  cross-check: strata:gpu_power_watts avg 214.9 W (1.6% vs hwmon)
+  cross-check: strata:gpu_power_watts 214.9 W (1.6% vs hwmon)
   total with 50 W baseline: 268.4 W  ->  $0.0328/hour while active
   rates: output 21.35 tok/s (2562 tokens)  input 96.10 tok/s (11532 uncached prompt tokens)
-  cache: 82% of prompt tokens served from cache (52110 cached / 11532 read)
-  per-Mtok: in $10.2431  out $3.6140  cached-in $1.0243 (assumed 10% of read)
-  effective blended input price: $2.8266 /Mtok at this hit rate
+  cache: 52110 cached / 11532 read prompt tokens (81.9% hit)
+  per-Mtok: in $10.2431  out $3.6140  cached-in $1.02431 (assumed 10% of read)
+  effective blended input price at this hit rate: $1.8541 /Mtok
+  paste into LiteLLM model_info:
+    model_info:
+      input_cost_per_token: 0.0000102431
+      output_cost_per_token: 0.0000036140
+      cache_read_input_token_cost: 0.0000010243
 ```
+
+Progress and diagnostics go to **stderr**, results to **stdout**, so
+`--format json` alone gives a clean JSON array you can pipe to `jq`.
 
 ### Flags
 
@@ -70,6 +79,8 @@ llm-cost: sampling for 120s (generate some tokens for a good sample)...
 | `--hwmon-dir`, `--curl-cmd` | system | Test hooks: point at a fake hwmon tree / stub curl |
 
 Precedence: **flags > environment (`LLM_COST_*`) > config file > built-in defaults.**
+That holds for a config file named with `--config` too: its *contents* sit at the file
+level, only the choice of file is a flag.
 
 ## Config file
 
@@ -107,6 +118,9 @@ side, and the host's existing script is only replaced if you say so.
 make test        # zero-dependency bash runner, uses fixtures + --hwmon-dir/--curl-cmd
 make lint        # shellcheck, if installed
 ```
+
+The Makefile is convenience only (GNU make is on the inference host, not on every
+laptop): `make test` is `bash tests/run.sh`, and `make install` is one `rsync`.
 
 ## Caveats
 
