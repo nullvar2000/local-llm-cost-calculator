@@ -62,6 +62,15 @@ disagrees with hwmon by more than 30%, one of them is lying and the run prints a
 hwmon is preferred because it costs nothing, covers the whole card (including the parts
 the engine cannot see), and works for engines that expose no telemetry at all.
 
+`strata:gpu_power_watts` only appears when the engine feeds hardware telemetry to the
+server — Strata 0.1.52 with the RX 6000 HIP build does not, so its `/metrics/prometheus`
+carries no `gpu`-named series at all and the cross-check line stays silent rather than
+claiming 0 W. Check with:
+
+```bash
+curl -s --config - http://127.0.0.1:8080/metrics/prometheus <<< "header = \"Authorization: Bearer $KEY\"" | grep gpu
+```
+
 ## Cost model
 
 ```

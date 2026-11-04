@@ -120,8 +120,8 @@ env_setting() { # <LLM_COST_NAME> <setting-key>
   [ -n "$val" ] || return 0
   apply_setting "$1" "$val" 2
 }
-apply_setting api_key        "${STRATA_API_KEY:-}"      2
-apply_setting api_key        "${LLM_COST_API_KEY:-}"    2
+env_setting api_key        "${STRATA_API_KEY:-}"
+env_setting api_key        "${LLM_COST_API_KEY:-}"
 env_setting rate             "${LLM_COST_RATE:-}"
 env_setting bill             "${LLM_COST_BILL:-}"
 env_setting usage            "${LLM_COST_USAGE:-}"

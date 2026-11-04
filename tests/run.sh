@@ -30,7 +30,9 @@ exit_is(){ [ "$status" -eq "$1" ] && ok "exit $1" || bad "exit $1 (got $status)"
 invoke() { # <stub-mode> [tool args...]
   local stub="$1"; shift
   rm -f "$SCRATCH/state"
+  if [ -n "${TEST_HEADER_LOG:-}" ]; then : > "$TEST_HEADER_LOG"; fi
   ( LLM_COST_TEST_STUB="$stub" LLM_COST_TEST_STATE="$SCRATCH/state" \
+    LLM_COST_TEST_HEADER_LOG="${TEST_HEADER_LOG:-}" \
     LLM_COST_SKIP_NVIDIA=1 LLM_COST_TEST_WATTS="${TEST_WATTS:-200}" \
     "$BIN" --curl-cmd "$FX/curl_stub.sh" --power-cmd "bash $FX/power_flat.sh" \
            --seconds 1 "$@" )
@@ -101,6 +103,33 @@ TEST="endpoint with an unknown engine prefix"
 out=$(invoke strata --endpoints "bogus:8080" --format text 2>&1); status=$?
 exit_is 1
 has "unknown engine 'bogus'"
+
+printf 'bearer token\n'
+
+TEST="\$STRATA_API_KEY is sent as the Bearer token"
+TEST_HEADER_LOG="$SCRATCH/hdr"
+out=$(STRATA_API_KEY=sk-fromenv invoke strata --endpoints "8080" --format text 2>&1); status=$?
+exit_is 0
+hdr=$(cat "$TEST_HEADER_LOG" 2>/dev/null)
+case "$hdr" in *'Bearer sk-fromenv'*) ok "sent: Bearer sk-fromenv" ;; *) bad "header log: $hdr" ;; esac
+
+TEST="\$LLM_COST_API_KEY wins over \$STRATA_API_KEY, and an empty one never clears it"
+out=$(STRATA_API_KEY=sk-strata LLM_COST_API_KEY=sk-llmcost invoke strata --endpoints "8080" --format text 2>&1); status=$?
+exit_is 0
+hdr=$(cat "$TEST_HEADER_LOG" 2>/dev/null)
+case "$hdr" in *'Bearer sk-llmcost'*) ok "sent: Bearer sk-llmcost" ;; *) bad "header log: $hdr" ;; esac
+out=$(STRATA_API_KEY=sk-onlyone LLM_COST_API_KEY= invoke strata --endpoints "8080" --format text 2>&1); status=$?
+exit_is 0
+hdr=$(cat "$TEST_HEADER_LOG" 2>/dev/null)
+case "$hdr" in *'Bearer sk-onlyone'*) ok "empty \$LLM_COST_API_KEY did not clear the key" ;; *) bad "header log: $hdr" ;; esac
+
+TEST="--key-file content is used, trailing newline stripped"
+printf 'sk-fromfile\n' > "$SCRATCH/strata.key"
+out=$(invoke strata --endpoints "8080" --key-file "$SCRATCH/strata.key" --format text 2>&1); status=$?
+exit_is 0
+hdr=$(cat "$TEST_HEADER_LOG" 2>/dev/null)
+case "$hdr" in *'Bearer sk-fromfile'*) ok "sent: Bearer sk-fromfile" ;; *) bad "header log: $hdr" ;; esac
+hasnt 'sk-fromfile'
 
 printf 'sensors\n'
 

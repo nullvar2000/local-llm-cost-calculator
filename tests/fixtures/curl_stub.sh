@@ -11,10 +11,17 @@ fx="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mode="${LLM_COST_TEST_STUB:-strata}"
 
 url=""
+uses_config_stdin=0
 for a in "$@"; do
-  case "$a" in http*) url="$a" ;; esac
+  case "$a" in http*) url="$a" ;; --config) uses_config_stdin=1 ;; esac
 done
 [ -n "$url" ] || exit 1
+
+# The tool passes bearer tokens through curl's stdin config so they never land in
+# argv; record what it sent so the tests can assert on it.
+if [ "$uses_config_stdin" -eq 1 ] && [ -n "${LLM_COST_TEST_HEADER_LOG:-}" ]; then
+  cat >> "$LLM_COST_TEST_HEADER_LOG"
+fi
 
 case "$url" in
   */health)
