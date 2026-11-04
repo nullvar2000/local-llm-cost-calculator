@@ -1,0 +1,36 @@
+# llm-cost configuration. Copy to ./llm-cost.conf or
+# ${XDG_CONFIG_HOME:-~/.config}/llm-cost/config and edit.
+#
+# Precedence: flags > environment (LLM_COST_*) > this file > built-in defaults.
+# Values here are the Aug 2026 figures for the box this project runs on.
+
+# $/kWh. Ignored when bill + usage are set.
+rate=0.12215
+
+# Monthly bill and the kWh it bought; rate is derived as bill/usage.
+# 217.43 / 1780 = 0.12215
+bill=217.43
+usage=1780
+
+# Watts for everything outside the GPU sensors (CPU, RAM, drives, fans, PSU loss).
+baseline=50
+
+# Sampling window in seconds, and the GPU-watt level above which a 1 s sample counts
+# as active rather than idle.
+seconds=60
+idle_threshold=30
+
+# Space-separated endpoints. Optional engine: prefix, bare port = auto-detect.
+endpoints=strata:8080 9931 9932
+
+host=127.0.0.1
+
+# Assumed cost of a cached prompt token as a fraction of a read one.
+cache_discount=0.10
+
+# Bearer token for authenticated /metrics/prometheus. Prefer a key file with mode 0600
+# (or the STRATA_API_KEY environment variable) over putting the key in this file.
+# key_file=~/.config/llm-cost/strata.key
+
+# text,yaml,json (or any comma-separated combination)
+format=text,yaml

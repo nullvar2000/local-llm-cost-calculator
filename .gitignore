@@ -1,0 +1,9 @@
+llm-cost.conf
+*.key
+*.env
+.env
+*.log
+*.json.out
+coverage/
+__pycache__/
+.DS_Store
