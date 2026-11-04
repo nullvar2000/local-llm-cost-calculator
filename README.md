@@ -101,6 +101,28 @@ model_info:
   cache_read_input_token_cost: 0.0000010243
 ```
 
+`docs/litellm-snippet.yaml` is the currently applied block for `qwen3.8-flash-next`
+on this network, with the sample it came from and how to re-measure it.
+
+## Applying the numbers
+
+LiteLLM's `*_cost_per_token` fields are dollars **per token** — paste them as printed.
+opencode's `provider.<name>.models.<model>.cost` fields are dollars **per million
+tokens**, so multiply by 1e6:
+
+```jsonc
+"qwen3.8-flash-next": {
+  "cost": { "input": 0.042134, "output": 0.902435,
+            "cache_read": 0.004213, "cache_write": 0.042134 },
+  "limit": { "context": 262144, "output": 32000 }
+}
+```
+
+Cost per token follows the traffic mix: a prefill-heavy window spends its watts while
+generating few output tokens, so the same GPU measures output at ~$0.90/Mtok under
+agent-shaped load and ~$0.17/Mtok under decode-shaped load. Sample the load you
+actually serve.
+
 ## Deploy to the inference host
 
 The repo is the source of truth; the inference box just runs the script.

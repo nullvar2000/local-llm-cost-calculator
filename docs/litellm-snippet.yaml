@@ -1,0 +1,28 @@
+# Measured costs for the local Strata server, measured 2026-11-04 with
+# bin/llm-cost.sh on 192.168.30.225 and pasted into
+# flux/apps/ai/litellm/litellm/files/config.yaml (model_name already exists
+# there; only the model_info block is new).
+#
+# Sample: 60 s window, agent-shaped traffic (13365 uncached prompt tokens +
+# 26700 cache-hit prompt tokens + 624 generated tokens, 3 long-prompt requests),
+# 226.6 W active GPU average + 50 W baseline at $0.12215169/kWh
+# (Aug 2026 bill $217.43 / 1780 kWh).
+#
+# These numbers track the traffic mix. A decode-shaped window (88 prompt tokens,
+# 2800 generated tokens, 46.7 tok/s) measures output at $0.1717/Mtok instead of
+# $0.9024/Mtok, because a prefill-heavy window spends its watts while generating
+# almost nothing. Keep whichever mix matches how the gateway is actually used.
+#
+#   re-measure:  make sample           # or on the host:
+#                ./llm-cost.sh --seconds 60 --endpoints strata:8080 \
+#                  --key-file ~/.config/llm-cost/strata.key --bill 217.43 --usage 1780
+
+- model_name: qwen3.8-flash-next
+  litellm_params:
+    model: openai/qwen3.8-flash-next-iq3_s
+    api_base: http://192.168.30.225:8080/v1
+    max_context_length: 262144
+  model_info:
+    input_cost_per_token: 0.000000042134        # $0.0421 / Mtok uncached prompt
+    output_cost_per_token: 0.000000902435       # $0.9024 / Mtok generated
+    cache_read_input_token_cost: 0.000000004213 # $0.0042 / Mtok cache hits
